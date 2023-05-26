@@ -7,9 +7,14 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UsersRepository::class)]
-class Users
+#[UniqueEntity(fields: ['email'], message: 'Cet email est déjà utilisé.')]
+#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
+class Users implements UserInterface
+
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -45,6 +50,9 @@ class Users
 
     #[ORM\OneToMany(mappedBy: 'user_id', targetEntity: Likes::class)]
     private Collection $likes;
+
+    #[ORM\Column(type: 'boolean')]
+    private $isVerified = false;
 
     public function __construct()
     {
@@ -248,6 +256,42 @@ class Users
                 $like->setUserId(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getRoles(): array
+    {
+        return ['ROLE_USER'];
+    }
+
+    public function getSalt(): ?string
+    {
+        // You can leave this method blank if you are using bcrypt for password hashing
+        // Salt is automatically generated and managed by bcrypt
+        return null;
+    }
+
+    public function getUsername(): ?string
+    {
+        return $this->email;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // Supprimer ici les données sensibles de l'utilisateur si nécessaire
+        // Par exemple, réinitialiser le mot de passe en le définissant sur null
+        $this->password = null;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->isVerified;
+    }
+
+    public function setIsVerified(bool $isVerified): self
+    {
+        $this->isVerified = $isVerified;
 
         return $this;
     }

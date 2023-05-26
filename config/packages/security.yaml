@@ -1,0 +1,31 @@
+# config/packages/security.yaml
+security:
+  encoders:
+    App\Entity\Users:
+      algorithm: bcrypt
+
+  providers:
+    app_user_provider:
+      entity:
+        class: App\Entity\Users
+        property: email
+
+  firewalls:
+    dev:
+      pattern: ^/(_(profiler|wdt)|css|images|js)/
+      security: false
+
+    main:
+      anonymous: ~
+      provider: app_user_provider
+      form_login:
+        login_path: app_users_login
+        check_path: app_users_login
+        default_target_path: app_users_index
+      logout:
+        path: app_users_logout
+        target: app_users_login
+
+  access_control:
+    - { path: ^/users/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/users, roles: ROLE_USER }
