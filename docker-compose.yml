@@ -14,3 +14,9 @@ services:
       - ./mysql_data:/var/lib/mysql
     ports:
       - '3306:3306'
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1035:1035"
+      - "8025:8025"
